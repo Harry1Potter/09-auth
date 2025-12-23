@@ -1,21 +1,36 @@
-import Link from "next/link";
+"use client";
+
 import css from "./Header.module.css";
+import AuthNavigation from "../AuthNavigation/AuthNavigation";
+import { useEffect } from "react";
+import { useAuthStore } from "@/lib/store/authStore";
+import { checkSession } from "@/lib/api/clientApi";
 
 export default function Header() {
+  const { setUser, clearIsAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const user = await checkSession();
+        if (user) {
+          setUser(user);
+        } else {
+          clearIsAuthenticated();
+        }
+      } catch {
+        clearIsAuthenticated();
+      }
+    };
+
+    initAuth();
+  }, [setUser, clearIsAuthenticated]);
+
   return (
     <header className={css.header}>
-      <Link href="/" aria-label="Home" className={css.logo}>
-        NoteHub
-      </Link>
-
-      <nav aria-label="Main Navigation">
+      <nav>
         <ul className={css.navigation}>
-          <li>
-            <Link href="/">Home</Link>
-          </li>
-          <li>
-            <Link href="/notes/filter/all">Notes</Link>
-          </li>
+          <AuthNavigation />
         </ul>
       </nav>
     </header>
