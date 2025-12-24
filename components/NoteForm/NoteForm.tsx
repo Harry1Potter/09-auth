@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useNoteStore, initialDraft, NoteTag } from "@/lib/store/noteStore";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addNote } from "@/lib/api";
+import { createNote } from "@/lib/api/clientApi";
 
 export default function NoteForm() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function NoteForm() {
       title: string;
       content: string;
       tag: NoteTag;
-    }) => addNote(newNote),
+    }) => createNote(newNote),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });

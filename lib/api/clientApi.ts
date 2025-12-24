@@ -1,8 +1,15 @@
 import { api } from "./api";
 import type { Note, NoteTag, NewNoteData } from "@/types/note";
 import type { User } from "@/types/user";
+import { QueryClient } from "@tanstack/react-query";
+import { cache } from "react";
 
 /* ---------- NOTES ---------- */
+
+const getQueryClient = cache(() => new QueryClient());
+
+export default getQueryClient;
+
 export interface NotesResponse {
   notes: Note[];
   totalPages: number;
