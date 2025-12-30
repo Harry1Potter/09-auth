@@ -2,14 +2,18 @@
 
 import css from "./Header.module.css";
 import AuthNavigation from "../AuthNavigation/AuthNavigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/lib/store/authStore";
 import { checkSession } from "@/lib/api/clientApi";
 
 export default function Header() {
-  const { setUser, clearIsAuthenticated } = useAuthStore();
+  const { setUser, clearIsAuthenticated, isAuthenticated } = useAuthStore();
+  const didInit = useRef(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
     const initAuth = async () => {
       try {
         const user = await checkSession();
@@ -24,7 +28,7 @@ export default function Header() {
     };
 
     initAuth();
-  }, [setUser, clearIsAuthenticated]);
+  }, [setUser, clearIsAuthenticated, isAuthenticated]);
 
   return (
     <header className={css.header}>

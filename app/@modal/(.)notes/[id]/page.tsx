@@ -4,16 +4,12 @@ import {
   dehydrate,
 } from '@tanstack/react-query';
 
-import { fetchNoteById } from '@/lib/api/clientApi';
+import { fetchNoteById } from "@/lib/api/serverApi";
 import NotePreviewClient from './NotePreview.client';
-
-//===========================================================================
 
 interface NotePreviewProps {
   params: Promise<{ id: string }>;
 }
-
-//===========================================================================
 
 async function NotePreview({ params }: NotePreviewProps) {
   const { id } = await params;

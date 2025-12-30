@@ -31,11 +31,7 @@ export default function NotesClient({ tag }: NotesClientProps) {
   const debouncedSearch = useDebounce(search, 400);
 
   const finalSearch =
-    debouncedSearch.trim() !== ""
-      ? debouncedSearch
-      : tag === "all"
-      ? ""
-      : tag;
+    debouncedSearch.trim() !== "" ? debouncedSearch : tag === "all" ? "" : tag;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", tag, debouncedSearch, page],
@@ -72,16 +68,18 @@ export default function NotesClient({ tag }: NotesClientProps) {
       </div>
 
       {notes.length > 0 ? (
-        <NoteList notes={notes} />
+        <>
+          <NoteList notes={notes} />
+
+          <Pagination
+            currentPage={page}
+            totalPages={data?.totalPages ?? 1}
+            onPageChange={setPage}
+          />
+        </>
       ) : (
         <p>No notes found.</p>
       )}
-
-      <Pagination
-        currentPage={page}
-        totalPages={data?.totalPages ?? 1}
-        onPageChange={setPage}
-      />
     </div>
   );
 }

@@ -1,16 +1,21 @@
 "use client";
 
 import css from "./SignUpPage.module.css";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { register } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const mutation = useMutation({
     mutationFn: register,
-    onSuccess: () => {
+    onSuccess: async (user) => {
+      setUser(user);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
       router.push("/profile");
     },
   });
@@ -63,10 +68,9 @@ export default function SignUpPage() {
           </button>
         </div>
 
-        {mutation.isError && (
-          <p className={css.error}>Registration failed</p>
-        )}
+        {mutation.isError && <p className={css.error}>Registration failed</p>}
       </form>
     </main>
   );
 }
+

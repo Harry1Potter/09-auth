@@ -1,15 +1,20 @@
-"use client";
-
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import type { Metadata } from "next";
+
 import css from "./ProfilePage.module.css";
-import { useAuthStore } from "@/lib/store/authStore";
+import { getMe } from "@/lib/api/serverApi";
 
-export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuthStore();
+export const metadata: Metadata = {
+  title: "NoteHub — Profile",
+};
 
-  if (!isAuthenticated || !user) {
-    return null;
+export default async function ProfilePage() {
+  const user = await getMe();
+
+  if (!user) {
+    redirect("/sign-in");
   }
 
   return (
@@ -43,4 +48,3 @@ export default function ProfilePage() {
     </main>
   );
 }
-

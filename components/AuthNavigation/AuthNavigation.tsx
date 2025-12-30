@@ -24,6 +24,11 @@ export default function AuthNavigation() {
 
   return (
     <>
+      <li className={css.navigationItem}>
+        <Link href="/" prefetch={false} className={css.navigationLink}>
+          Home
+        </Link>
+      </li>
       {isAuthenticated ? (
         <>
           <li className={css.navigationItem}>
@@ -70,6 +75,15 @@ export default function AuthNavigation() {
           </li>
         </>
       )}
+      <li className={css.navigationItem}>
+        <Link
+          href="/notes/filter/all"
+          prefetch={false}
+          className={css.navigationLink}
+        >
+          Notes
+        </Link>
+      </li>
     </>
   );
 }
