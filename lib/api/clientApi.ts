@@ -1,14 +1,15 @@
-import { api } from "./api";
+import { proxy } from "./proxy";
 import type { Note, NoteTag, NewNoteData } from "@/types/note";
 import type { User } from "@/types/user";
 import { QueryClient } from "@tanstack/react-query";
 import { cache } from "react";
 
-/* ---------- NOTES ---------- */
+/* ---------- QUERY CLIENT ---------- */
 
 const getQueryClient = cache((): QueryClient => new QueryClient());
-
 export default getQueryClient;
+
+/* ---------- NOTES ---------- */
 
 export interface NotesResponse {
   notes: Note[];
@@ -37,29 +38,45 @@ export async function fetchNotes({
   if (q.length >= 2) params.search = q;
   if (tag !== "all") params.tag = tag;
 
-  const { data } = await api.get("/notes", { params });
+  const response = await proxy<NotesResponse>({
+    method: "GET",
+    url: "/notes",
+    params,
+  });
 
   return {
-    notes: data.notes ?? [],
-    totalPages: data.totalPages ?? 1,
-    totalItems: data.totalItems,
-    page: data.page ?? page,
-    perPage: data.perPage ?? perPage,
+    notes: response.data.notes ?? [],
+    totalPages: response.data.totalPages ?? 1,
+    totalItems: response.data.totalItems,
+    page: response.data.page ?? page,
+    perPage: response.data.perPage ?? perPage,
   };
 }
 
 export async function fetchNoteById(id: string): Promise<Note> {
-  const { data } = await api.get<Note>(`/notes/${id}`);
-  return data;
+  const response = await proxy<Note>({
+    method: "GET",
+    url: `/notes/${id}`,
+  });
+
+  return response.data;
 }
 
 export async function createNote(note: NewNoteData): Promise<Note> {
-  const { data } = await api.post<Note>("/notes", note);
-  return data;
+  const response = await proxy<Note>({
+    method: "POST",
+    url: "/notes",
+    data: note,
+  });
+
+  return response.data;
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  await api.delete(`/notes/${id}`);
+  await proxy<void>({
+    method: "DELETE",
+    url: `/notes/${id}`,
+  });
 }
 
 /* ---------- AUTH ---------- */
@@ -70,32 +87,58 @@ export interface RegisterPayload {
 }
 
 export async function register(payload: RegisterPayload): Promise<User> {
-  const { data } = await api.post<User>("/auth/register", payload);
-  return data;
+  const response = await proxy<User>({
+    method: "POST",
+    url: "/auth/register",
+    data: payload,
+  });
+
+  return response.data;
 }
 
 export async function login(payload: RegisterPayload): Promise<User> {
-  const { data } = await api.post<User>("/auth/login", payload);
-  return data;
+  const response = await proxy<User>({
+    method: "POST",
+    url: "/auth/login",
+    data: payload,
+  });
+
+  return response.data;
 }
 
 export async function logout(): Promise<void> {
-  await api.post("/auth/logout");
+  await proxy<void>({
+    method: "POST",
+    url: "/auth/logout",
+  });
 }
 
 export async function checkSession(): Promise<User> {
-  const { data } = await api.get<User>("/auth/session");
-  return data;
+  const response = await proxy<User>({
+    method: "GET",
+    url: "/auth/session",
+  });
+
+  return response.data;
 }
 
 export async function getMe(): Promise<User> {
-  const { data } = await api.get<User>("/users/me");
-  return data;
+  const response = await proxy<User>({
+    method: "GET",
+    url: "/users/me",
+  });
+
+  return response.data;
 }
 
 export async function updateMe(payload: {
   username: string;
 }): Promise<User> {
-  const { data } = await api.patch<User>("/users/me", payload);
-  return data;
+  const response = await proxy<User>({
+    method: "PATCH",
+    url: "/users/me",
+    data: payload,
+  });
+
+  return response.data;
 }

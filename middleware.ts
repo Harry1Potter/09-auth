@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkSession } from "@/lib/api/serverApi";
 
 const privateRoutes = ["/profile", "/notes"];
 const publicRoutes = ["/sign-in", "/sign-up"];
@@ -23,19 +22,24 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    const response = await checkSession();
+    const response = await fetch(
+      `${request.nextUrl.origin}/api/auth/session`,
+      {
+        headers: {
+          Cookie: request.headers.get("cookie") ?? "",
+        },
+      }
+    );
 
-    if (!response) {
+    if (!response.ok) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
     const res = NextResponse.next();
-    const setCookie = response.headers["set-cookie"];
 
+    const setCookie = response.headers.get("set-cookie");
     if (setCookie) {
-      setCookie.forEach((cookie) => {
-        res.headers.append("Set-Cookie", cookie);
-      });
+      res.headers.append("Set-Cookie", setCookie);
     }
 
     return res;
