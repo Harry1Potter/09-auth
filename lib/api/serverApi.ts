@@ -1,80 +1,99 @@
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import { cookies } from "next/headers";
 import { QueryClient } from "@tanstack/react-query";
 import { cache } from "react";
 
-import { proxy } from "./proxy";
+import { api } from "./api";
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
 import type { NoteTag } from "@/lib/store/noteStore";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
-/* ---------- COOKIES ---------- */
+async function serverRequest<ResponseData>(
+  config: AxiosRequestConfig
+): Promise<AxiosResponse<ResponseData>> {
+  const cookieStore: ReadonlyRequestCookies = await cookies();
+  const allCookies = cookieStore.getAll();
 
-async function getCookieHeader(): Promise<{ Cookie: string }> {
-  const cookieStore = await cookies();
-
-  return {
-    Cookie: cookieStore.toString(),
+  const headers: Record<string, string> = {
+    ...(config.headers as Record<string, string>),
   };
-}
 
-/* ---------- NOTES ---------- */
+  if (allCookies.length > 0) {
+    headers.Cookie = allCookies
+      .map(
+        (cookie: { name: string; value: string }) =>
+          `${cookie.name}=${encodeURIComponent(cookie.value)}`
+      )
+      .join("; ");
+  }
+
+  return api.request<ResponseData>({
+    ...config,
+    headers,
+  });
+}
 
 export async function fetchNotes(params?: {
   search?: string;
   tag?: NoteTag;
   page?: number;
   perPage?: number;
-}): Promise<Note[]> {
-  const response = await proxy<Note[]>({
+}): Promise<AxiosResponse<Note[]>> {
+  return serverRequest<Note[]>({
     method: "GET",
     url: "/notes",
     params,
-    headers: await getCookieHeader(),
   });
-
-  return response.data;
 }
 
-export async function fetchNoteById(id: string): Promise<Note> {
-  const response = await proxy<Note>({
+export async function fetchNoteById(
+  id: string
+): Promise<AxiosResponse<Note>> {
+  return serverRequest<Note>({
     method: "GET",
     url: `/notes/${id}`,
-    headers: await getCookieHeader(),
   });
-
-  return response.data;
 }
 
-/* ---------- AUTH ---------- */
-
-export async function checkSession(): Promise<User | null> {
-  try {
-    const response = await proxy<User>({
-      method: "GET",
-      url: "/auth/session",
-      headers: await getCookieHeader(),
-    });
-
-    return response.data;
-  } catch {
-    return null;
-  }
+export interface RefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
 }
+
+export async function refreshSession(
+  refreshToken: string
+): Promise<AxiosResponse<RefreshResponse>> {
+  return serverRequest<RefreshResponse>({
+    method: "POST",
+    url: "/auth/refresh",
+    data: { refreshToken },
+  });
+}
+
+export async function checkSession(): Promise<AxiosResponse<User>> {
+  return serverRequest<User>({
+    method: "GET",
+    url: "/auth/session",
+  });
+}
+
+export const getQueryClient = cache(
+  (): QueryClient => new QueryClient()
+);
 
 export async function getMe(): Promise<User | null> {
   try {
-    const response = await proxy<User>({
+    // Використовуємо serverRequest, який автоматично додає всі cookie
+    const response = await serverRequest<User>({
       method: "GET",
       url: "/users/me",
-      headers: await getCookieHeader(),
     });
 
     return response.data;
-  } catch {
+  } catch (err) {
+    console.error("Failed to fetch user:", err);
     return null;
   }
 }
-
-/* ---------- QUERY CLIENT ---------- */
-
-export const getQueryClient = cache((): QueryClient => new QueryClient());
