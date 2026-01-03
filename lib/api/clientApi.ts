@@ -55,8 +55,9 @@ export async function createNote(note: NewNoteData): Promise<Note> {
   return data;
 }
 
-export async function deleteNote(id: string): Promise<void> {
-  await api.delete(`/notes/${id}`);
+export async function deleteNote(id: string): Promise<Note> {
+  const { data } = await api.delete<Note>(`/notes/${id}`);
+  return data;
 }
 
 export interface RegisterPayload {
