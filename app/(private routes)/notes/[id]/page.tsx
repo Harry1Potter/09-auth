@@ -18,12 +18,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
 
-  const note = await fetchNoteById(id);
+  const response = await fetchNoteById(id);
+  const note = response.data; // ось тут беремо Note
 
   const title = note.title ? `NoteHub — ${note.title}` : "NoteHub — Нотатка";
+
   const rawContent = (note.content ?? "").trim();
   const description =
-    rawContent.length > 0 ? (rawContent.slice(0, 160) + (rawContent.length > 160 ? "..." : "")) : "Деталі нотатки в NoteHub.";
+    rawContent.length > 0
+      ? rawContent.slice(0, 160) + (rawContent.length > 160 ? "..." : "")
+      : "Деталі нотатки в NoteHub.";
 
   return {
     title,
