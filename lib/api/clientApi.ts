@@ -4,16 +4,8 @@ import type { User } from "@/types/user";
 import { QueryClient } from "@tanstack/react-query";
 import { cache } from "react";
 
-/* =======================
-   React Query
-======================= */
-
 const getQueryClient = cache((): QueryClient => new QueryClient());
 export default getQueryClient;
-
-/* =======================
-   Types
-======================= */
 
 export interface NotesResponse {
   notes: Note[];
@@ -29,10 +21,6 @@ export interface FetchNotesParams {
   page?: number;
   perPage?: number;
 }
-
-/* =======================
-   Notes
-======================= */
 
 export async function fetchNotes({
   search = "",
@@ -71,10 +59,6 @@ export async function deleteNote(id: string): Promise<void> {
   await api.delete(`/notes/${id}`);
 }
 
-/* =======================
-   Auth
-======================= */
-
 export interface RegisterPayload {
   email: string;
   password: string;
@@ -98,10 +82,6 @@ export async function checkSession(): Promise<User> {
   const { data } = await api.get<User>("/auth/session");
   return data;
 }
-
-/* =======================
-   User
-======================= */
 
 export async function getMe(): Promise<User> {
   const { data } = await api.get<User>("/users/me");

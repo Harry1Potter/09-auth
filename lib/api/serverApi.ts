@@ -85,7 +85,6 @@ export const getQueryClient = cache(
 
 export async function getMe(): Promise<User | null> {
   try {
-    // Використовуємо serverRequest, який автоматично додає всі cookie
     const response = await serverRequest<User>({
       method: "GET",
       url: "/users/me",
