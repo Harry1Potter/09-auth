@@ -34,6 +34,16 @@ async function serverRequest<ResponseData>(
   });
 }
 
+export async function checkServerSession() {
+  const cookieStore = await cookies();
+  const res = await api.get('/auth/session', {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return res;
+}
+
 export async function fetchNotes(params?: {
   search?: string;
   tag?: NoteTag;
