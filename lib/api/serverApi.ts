@@ -72,11 +72,14 @@ export async function refreshSession(
   });
 }
 
-export async function checkSession(): Promise<AxiosResponse<User>> {
-  return serverRequest<User>({
-    method: "GET",
-    url: "/auth/session",
+export async function checkSession() {
+  const cookieStore = await cookies();
+  const res = await api.get('/auth/session', {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
   });
+  return res;
 }
 
 export const getQueryClient = cache(
