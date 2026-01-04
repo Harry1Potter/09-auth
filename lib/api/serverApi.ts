@@ -72,7 +72,7 @@ export async function refreshSession(
   });
 }
 
-export async function checkSession() {
+export async function checkSessionServer() {
   const cookieStore = await cookies();
   const res = await api.get('/auth/session', {
     headers: {
