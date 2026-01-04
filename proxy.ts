@@ -20,20 +20,21 @@ export async function proxy(request: NextRequest) {
     try {
       const response = await refreshSession(refreshToken);
 
-      const { accessToken: newAccess, refreshToken: newRefresh } = response.data;
+      const { accessToken: newAccess, refreshToken: newRefresh } =
+        response.data;
 
       const nextResponse = NextResponse.next();
 
       nextResponse.cookies.set("accessToken", newAccess, {
         httpOnly: true,
-        sameSite: "lax",
         secure: true,
+        sameSite: "none",
       });
 
       nextResponse.cookies.set("refreshToken", newRefresh, {
         httpOnly: true,
-        sameSite: "lax",
         secure: true,
+        sameSite: "none",
       });
 
       accessToken = newAccess;
@@ -63,12 +64,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/profile/:path*",
-    "/notes/:path*",
-    "/sign-in",
-    "/sign-up",
-  ],
+  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 };
 
 export default proxy;
