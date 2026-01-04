@@ -25,6 +25,23 @@ export async function proxy(request: NextRequest) {
 
       const nextResponse = NextResponse.next();
 
+      const COOKIE_DOMAIN =
+        process.env.NODE_ENV === "production" ? ".vercel.app" : undefined;
+
+      nextResponse.cookies.set("accessToken", newAccess, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: COOKIE_DOMAIN,
+      });
+
+      nextResponse.cookies.set("refreshToken", newRefresh, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        domain: COOKIE_DOMAIN,
+      });
+
       nextResponse.cookies.set("accessToken", newAccess, {
         httpOnly: true,
         secure: true,
